@@ -11,7 +11,7 @@ O HD, sigla para *Hard Disk* (Disco Rígido), é um dispositivo de armazenamento
 
 ## Como funciona
 
-![Componentes internos de um HD](imagens/hdFoto.webp)
+![Componentes internos de um HD](hdFoto.webp)
 
 O HD armazena informações em pratos (discos) metálicos recobertos por material magnético, que giram em alta velocidade dentro do gabinete do dispositivo. Uma cabeça de leitura e gravação, posicionada a poucos nanômetros da superfície dos pratos (sem tocá-la), se move para ler ou gravar dados em trilhas magnéticas concêntricas, que por sua vez são divididas em setores.
 

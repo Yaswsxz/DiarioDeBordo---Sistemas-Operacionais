@@ -112,3 +112,76 @@ O primeiro HD, o IBM 350, foi lançado em 1956 e pesava cerca de uma tonelada, a
 ## Considerações finais
 
 O HD continua sendo uma opção relevante quando o objetivo é armazenar grandes quantidades de dados a um custo menor, especialmente em backups e servidores de arquivos. Já os SSDs se tornaram o padrão para desempenho, sendo amplamente utilizados como unidade principal em notebooks e desktops modernos, muitas vezes em conjunto com um HDD para armazenamento secundário.
+
+--- 
+
+# Processo de Inicialização 
+
+<div align="center">
+    <img src="fluxograma.svg" alt="Componentes internos de um HD" width="1000">
+</div>
+
+## 1. Quais componentes de hardware são acionados em cada etapa
+
+1. A **fonte** energiza a **placa-mãe**, que ativa o **processador (CPU)**.
+2. A **CPU** aponta para um endereço fixo de memória onde está o **BIOS**, armazenado na **memória ROM** ou **memória EEPROM** (mais comum atualmente).
+3. O **BIOS** busca por uma fonte de inicialização no armazenamento, que pode ser:
+   - Disco rígido (**HDD/SSD**), via **SATA**
+   - **Pendrive USB**
+4. O **núcleo do SO (kernel)** é carregado na **memória RAM**.
+
+
+## 2. Quais funções o BIOS/UEFI executa
+
+- **Realiza o POST (Power-On Self Test)**, que verifica a integridade do hardware e dos periféricos, varrendo os barramentos PCIe e PCI.
+- **Acessa o CMOS** (BIOS) **ou NVRAM** (UEFI) para buscar informações salvas anteriormente (data/hora, configurações de hardware).
+- **Inicializa os controladores** (SATA, USB, PCIe), necessários para se comunicar com o armazenamento e demais dispositivos.
+- Realiza a **busca pelo dispositivo de inicialização**.
+- Fornece uma **interface de configuração** (Setup), permitindo, por exemplo, escolher outra fonte de inicialização (como um pendrive), entre outras configurações.
+- **Aciona o gerenciador de inicialização (bootloader)**.
+
+### UEFI vs. BIOS
+
+| | BIOS (legado) | UEFI (moderno) |
+|---|---|---|
+| Onde busca o código de boot | **MBR** (Master Boot Record), no setor 0 do disco | Partição especial **ESP** (EFI System Partition), onde fica o arquivo `.efi` do bootloader |
+| Memória de configurações | CMOS (volátil, depende de bateria) | NVRAM (não-volátil) |
+
+## 3. Como o sistema operacional assume o controle
+
+1. O **bootloader** carrega o **kernel** (núcleo do sistema operacional) na **memória RAM**.
+2. O bootloader **transfere o controle da CPU** para o kernel.
+3. O **kernel** assume e passa a ser responsável por:
+   - Gerenciamento de memória
+   - Gerenciamento de processos
+   - Drivers de dispositivos
+   - Chamadas de sistema e segurança
+4. O kernel inicializa suas **tabelas** e o **sistema de arquivos**, carrega os **drivers** e o restante do sistema operacional, e então cria os **processos de segundo plano** necessários.
+
+## 4. Onde entram os drivers e gerenciadores de recursos
+
+Os drivers e gerenciadores de recursos entram na fase em que o **kernel assume o controle**:
+
+- Para cada dispositivo, o kernel **confere se existe um driver disponível**.
+- Em caso de ausência, o sistema pode sinalizar ao usuário (ex.: mensagem de "dispositivo desconhecido"), solicitando a instalação do driver correspondente.
+- Assim que os drivers estão disponíveis, o sistema operacional os **carrega no núcleo**.
+
+## 5. Papel dos barramentos e dispositivos de E/S nesse processo
+
+Os barramentos aparecem em **três momentos distintos** do processo de boot:
+
+1. **Durante a POST:** o BIOS/UEFI percorre fisicamente os barramentos (PCIe, PCI) para realizar o autoteste dos dispositivos conectados.
+2. **Na busca pelo dispositivo de boot:** o barramento correspondente (SATA, USB) é usado para se comunicar com o armazenamento e localizar o setor/partição de boot.
+3. **Quando o kernel assume o controle:** o kernel usa os drivers para se comunicar com os dispositivos através dos barramentos, de forma contínua durante toda a operação do sistema.
+
+## Resumo da sequência completa
+
+```
+Fonte → Placa-mãe → CPU → BIOS/UEFI (ROM/EEPROM)
+   → POST → CMOS/NVRAM → Controladores (SATA/USB/PCIe)
+   → Busca do dispositivo de boot
+   → [BIOS: MBR → VBR]  ou  [UEFI: ESP → arquivo .efi]
+   → Bootloader → Kernel carregado na RAM
+   → Kernel assume o controle → Drivers e gerenciadores de recursos
+   → Processos de segundo plano → Tela de login / sistema pronto
+```
